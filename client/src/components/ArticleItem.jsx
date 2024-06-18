@@ -6,7 +6,7 @@ export default function ArticleItem({ article }) {
       <aside key={uuidv4()}>
         <img key={uuidv4()} width="200px" src={article.article_img_url} />
         <button key={uuidv4()}>{article.votes}</button>
-        <button key={uuidv4()}>comments</button>
+        <button key={uuidv4()}>{article.comment_count} comments</button>
       </aside>
       <article key={uuidv4()}>
         <h3 key={uuidv4()}>{article.title}</h3>
