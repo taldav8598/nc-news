@@ -5,6 +5,13 @@ export function fetchArticles() {
     .get("https://be-nc-news-04rn.onrender.com/api/articles")
     .then(({ data }) => {
       return data.articles;
-    })
-    .catch((err) => console.log(err));
+    });
+}
+
+export function fetchArticleById(article_id) {
+  return axios
+    .get(`https://be-nc-news-04rn.onrender.com/api/articles/${article_id}`)
+    .then(({ data }) => {
+      return data.article;
+    });
 }
