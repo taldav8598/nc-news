@@ -3,21 +3,32 @@ import "./ArticlesPage.css";
 import { v4 as uuidv4 } from "uuid";
 import ArticleItem from "./ArticleItem";
 import { Link } from "react-router-dom";
+import Loading from "./Loading";
 
-export default function ArticlesPage({ articles }) {
+export default function ArticlesPage({
+  articles,
+  fetchArticlesError,
+  isArticlesLoading,
+}) {
   return (
     <>
       <Header />
       <section className="article-page-section">
-        {articles.map((article) => {
-          return (
-            <Link to={`/articles/${article.article_id}`}>
-              <div className="article-item-container" key={uuidv4()}>
-                <ArticleItem article={article} />
-              </div>
-            </Link>
-          );
-        })}
+        {fetchArticlesError ? (
+          <ErrorPage fetchArticlesError={fetchArticlesError} />
+        ) : isArticlesLoading ? (
+          <Loading />
+        ) : !isArticlesLoading ? (
+          articles.map((article) => {
+            return (
+              <Link to={`/articles/${article.article_id}`}>
+                <div className="article-item-container" key={uuidv4()}>
+                  <ArticleItem article={article} />
+                </div>
+              </Link>
+            );
+          })
+        ) : null}
       </section>
     </>
   );
