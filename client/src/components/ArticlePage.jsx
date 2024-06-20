@@ -5,7 +5,7 @@ import Loading from "./Loading";
 import ErrorPage from "./ErrorPage";
 import Comment from "./Comment";
 
-export default function ArticlePage({ articles }) {
+export default function ArticlePage({ articles, setArticles }) {
   const [article, setArticle] = useState([]);
   const [comments, setComments] = useState([]);
   const [isArticleLoading, setIsArticleLoading] = useState(true);
@@ -13,8 +13,18 @@ export default function ArticlePage({ articles }) {
   const [fetchArticleByIdError, setFetchArticleByIdError] = useState(null);
   const [fetchArticleCommentsByIdError, setFetchArticleByCommentsError] =
     useState(null);
-
   const { article_id } = useParams();
+  const [votes, setVotes] = useState(getVotes());
+
+  function getVotes() {
+    const articlesDataArr = JSON.parse(localStorage.getItem("articles"));
+
+    const votes = articlesDataArr.filter(
+      (article) => article.article_id === Number(article_id)
+    )[0]?.votes;
+
+    return votes || 0;
+  }
 
   useEffect(() => {
     fetchArticleById(article_id)
@@ -34,11 +44,29 @@ export default function ArticlePage({ articles }) {
       .catch((err) => {
         setFetchArticleByCommentsError(err);
       });
-  }, []);
+  }, [votes]);
 
   const articleComments = articles.filter(
-    (article) => article.article_id === +article_id
+    (article) => article?.article_id === +article_id
   )[0]?.comment_count;
+
+  function handleVotes(id) {
+    const articlesData = JSON.parse(localStorage.getItem("articles"));
+
+    const newArticlesData = articlesData.map((articleObj) => {
+      if (articleObj?.title === id) {
+        return { ...articleObj, votes: articleObj.votes + 1 };
+      } else {
+        return articleObj;
+      }
+    });
+
+    localStorage.setItem("articles", JSON.stringify(newArticlesData));
+
+    setArticle({ ...article, votes: (article.votes += 1) });
+
+    setVotes(votes + 1);
+  }
 
   return (
     <>
@@ -49,14 +77,19 @@ export default function ArticlePage({ articles }) {
           <Loading />
         ) : !isArticleLoading ? (
           <>
-            <h3>{article.title}</h3>
-            <h4>{article.topic}</h4>
-            <h5>{article.author}</h5>
-            <p>{new Date(article.created_at).toUTCString()}</p>
-            <img width="200px" src={article.article_img_url} alt="" />
-            <p>{article.body}</p>
+            <h3>{article?.title}</h3>
+            <h4>{article?.topic}</h4>
+            <h5>{article?.author}</h5>
+            <p>{new Date(article?.created_at).toUTCString()}</p>
+            <img width="200px" src={article?.article_img_url} alt="" />
+            <p>{article?.body}</p>
             <div>
-              <button>{article.votes}</button>
+              <button
+                id={article?.title}
+                onClick={(event) => handleVotes(event.target.id)}
+              >
+                {votes}
+              </button>
               <button>{articleComments}</button>
             </div>
           </>
@@ -64,7 +97,9 @@ export default function ArticlePage({ articles }) {
       </article>
       <section>
         {fetchArticleCommentsByIdError ? (
-          <ErrorPage error={fetchArticleCommentsByIdError} />
+          <ErrorPage
+            error={{ message: "There are no comments for this article yet." }}
+          />
         ) : isCommentsLoading ? (
           <Loading />
         ) : !isCommentsLoading ? (
