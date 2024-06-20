@@ -13,20 +13,27 @@ import { useEffect, useState } from "react";
 import { fetchArticles } from "./api";
 
 function App() {
-  const [articles, setArticles] = useState([]);
+  const [articles, setArticles] = useState(getInitialArticles());
   const [fetchArticlesError, setFetchArticlesError] = useState(null);
   const [isArticlesLoading, setIsArticlesLoading] = useState(true);
+
+  function getInitialArticles() {
+    const initialArticles = JSON.parse(localStorage.getItem("articles"));
+    return initialArticles || [];
+  }
 
   useEffect(() => {
     fetchArticles()
       .then((articlesFromApi) => {
-        setArticles(articlesFromApi);
+        if (articles.length === 0) {
+          localStorage.setItem("articles", JSON.stringify(articlesFromApi));
+        }
         setIsArticlesLoading(false);
       })
       .catch((err) => {
         setFetchArticlesError(err);
       });
-  }, []);
+  }, [articles]);
 
   if (fetchArticlesError) {
     return <ErrorPage error={fetchArticlesError} />;
@@ -52,7 +59,9 @@ function App() {
         <Route path="/users" element={<UsersPage />}></Route>
         <Route
           path="/articles/:article_id"
-          element={<ArticlePage articles={articles} />}
+          element={
+            <ArticlePage articles={articles} setArticles={setArticles} />
+          }
         ></Route>
       </Routes>
     </div>
