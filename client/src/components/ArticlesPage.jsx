@@ -9,6 +9,7 @@ export default function ArticlesPage({
   articles,
   fetchArticlesError,
   isArticlesLoading,
+  comments,
 }) {
   return (
     <>
@@ -19,11 +20,15 @@ export default function ArticlesPage({
         ) : isArticlesLoading ? (
           <Loading />
         ) : !isArticlesLoading ? (
-          articles.map((article) => {
+          articles.map((article, index) => {
             return (
               <Link to={`/articles/${article.article_id}`}>
                 <div className="article-item-container" key={uuidv4()}>
-                  <ArticleItem article={article} />
+                  <ArticleItem
+                    article={article}
+                    articles={articles}
+                    index={index}
+                  />
                 </div>
               </Link>
             );

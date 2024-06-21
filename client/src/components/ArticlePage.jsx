@@ -4,10 +4,17 @@ import { fetchArticleById, fetchArticleCommentsById } from "../api";
 import Loading from "./Loading";
 import ErrorPage from "./ErrorPage";
 import Comment from "./Comment";
+import "./ArticlePage.css";
+import { postArticleCommentById } from "../api";
 
-export default function ArticlePage({ articles, setArticles }) {
+export default function ArticlePage({
+  articles,
+  username,
+  comments,
+  setComments,
+}) {
   const [article, setArticle] = useState([]);
-  const [comments, setComments] = useState([]);
+
   const [isArticleLoading, setIsArticleLoading] = useState(true);
   const [isCommentsLoading, setIsCommentsLoading] = useState(true);
   const [fetchArticleByIdError, setFetchArticleByIdError] = useState(null);
@@ -15,6 +22,7 @@ export default function ArticlePage({ articles, setArticles }) {
     useState(null);
   const { article_id } = useParams();
   const [votes, setVotes] = useState(getVotes());
+  const [commentInput, setCommentInput] = useState("");
 
   function getVotes() {
     const articlesDataArr = JSON.parse(localStorage.getItem("articles"));
@@ -44,7 +52,7 @@ export default function ArticlePage({ articles, setArticles }) {
       .catch((err) => {
         setFetchArticleByCommentsError(err);
       });
-  }, [votes]);
+  }, []);
 
   const articleComments = articles.filter(
     (article) => article?.article_id === +article_id
@@ -63,9 +71,13 @@ export default function ArticlePage({ articles, setArticles }) {
 
     localStorage.setItem("articles", JSON.stringify(newArticlesData));
 
-    setArticle({ ...article, votes: (article.votes += 1) });
+    setArticle({ ...article, votes: article.votes + 1 });
 
     setVotes(votes + 1);
+  }
+
+  function handleCommentInput(event) {
+    setCommentInput(event.target.value);
   }
 
   return (
@@ -90,11 +102,61 @@ export default function ArticlePage({ articles, setArticles }) {
               >
                 {votes}
               </button>
-              <button>{articleComments}</button>
+              <button>{comments.length}</button>
             </div>
           </>
         ) : null}
       </article>
+      <form
+        onSubmit={(event) =>
+          postArticleCommentById(event, article_id, commentInput, username)
+            .then((comment) => {
+              setCommentInput("");
+              setIsCommentsLoading(true);
+              fetchArticleCommentsById(article_id)
+                .then((articleCommentsFromApi) => {
+                  setComments(articleCommentsFromApi);
+
+                  const articlesData = JSON.parse(
+                    localStorage.getItem("articles")
+                  );
+
+                  const newArticlesData = articlesData.map((articleObj) => {
+                    if (articleObj?.article_id === +article_id) {
+                      return {
+                        ...articleObj,
+                        comment_count: (
+                          +articleObj.comment_count + 1
+                        ).toString(),
+                      };
+                    } else {
+                      return articleObj;
+                    }
+                  });
+
+                  localStorage.setItem(
+                    "articles",
+                    JSON.stringify(newArticlesData)
+                  );
+
+                  setIsCommentsLoading(false);
+                })
+                .catch((err) => {
+                  setFetchArticleByCommentsError(err);
+                });
+            })
+            .catch((err) => console.log(err))
+        }
+        className="comment-form"
+      >
+        <textarea
+          value={commentInput}
+          onChange={(event) => handleCommentInput(event)}
+          id="comment-text-area"
+          placeholder="Add comment..."
+        ></textarea>
+        <button>Post</button>
+      </form>
       <section>
         {fetchArticleCommentsByIdError ? (
           <ErrorPage

@@ -14,8 +14,10 @@ import { fetchArticles } from "./api";
 
 function App() {
   const [articles, setArticles] = useState(getInitialArticles());
+  const [comments, setComments] = useState([]);
   const [fetchArticlesError, setFetchArticlesError] = useState(null);
   const [isArticlesLoading, setIsArticlesLoading] = useState(true);
+  const [username, setUsername] = useState("tickle122");
 
   function getInitialArticles() {
     const initialArticles = JSON.parse(localStorage.getItem("articles"));
@@ -33,7 +35,7 @@ function App() {
       .catch((err) => {
         setFetchArticlesError(err);
       });
-  }, [articles]);
+  }, []);
 
   if (fetchArticlesError) {
     return <ErrorPage error={fetchArticlesError} />;
@@ -53,6 +55,7 @@ function App() {
               articles={articles}
               fetchArticlesError={fetchArticlesError}
               isArticlesLoading={isArticlesLoading}
+              comments={comments}
             />
           }
         ></Route>
@@ -60,7 +63,12 @@ function App() {
         <Route
           path="/articles/:article_id"
           element={
-            <ArticlePage articles={articles} setArticles={setArticles} />
+            <ArticlePage
+              articles={articles}
+              username={username}
+              comments={comments}
+              setComments={setComments}
+            />
           }
         ></Route>
       </Routes>

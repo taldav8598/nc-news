@@ -1,0 +1,11 @@
+.comment-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.comment-form > textarea {
+  resize: none;
+  width: 20em;
+  height: 10em;
+  padding: 0.25em;
+}

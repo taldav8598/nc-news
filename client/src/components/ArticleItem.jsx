@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
-export default function ArticleItem({ article }) {
+export default function ArticleItem({ article, index }) {
   const [articleItemVotes, setArticleItemVotes] = useState(
     getArticleItemVotes()
   );
+
+  const articlesData = JSON.parse(localStorage.getItem("articles"));
 
   function getArticleItemVotes() {
     const articlesData = JSON.parse(localStorage.getItem("articles"));
@@ -21,7 +23,9 @@ export default function ArticleItem({ article }) {
       <aside key={uuidv4()}>
         <img key={uuidv4()} width="200px" src={article.article_img_url} />
         <button key={uuidv4()}>{articleItemVotes}</button>
-        <button key={uuidv4()}>{article.comment_count} comments</button>
+        <button key={uuidv4()}>
+          {articlesData[index].comment_count} comments
+        </button>
       </aside>
       <article key={uuidv4()}>
         <h3 key={uuidv4()}>{article.title}</h3>

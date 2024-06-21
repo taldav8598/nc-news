@@ -25,3 +25,19 @@ export function fetchArticleCommentsById(article_id) {
       return data.comments;
     });
 }
+
+export function postArticleCommentById(event, article_id, comment, username) {
+  event.preventDefault();
+  console.log(article_id, comment, username);
+  return axios
+    .post(
+      `https://be-nc-news-04rn.onrender.com/api/articles/${article_id}/comments`,
+      {
+        username: username,
+        body: comment,
+      }
+    )
+    .then(({ data }) => {
+      return data.comment;
+    });
+}
